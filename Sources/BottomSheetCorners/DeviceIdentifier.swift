@@ -52,12 +52,17 @@ internal struct DeviceIdentifier {
         case (1320, 2868):  return .iPhone16ProMax
             
         // iPhone 17 series (17, 17 Air, 17 Pro, 17 Pro Max)
-        case (1260, 2736):  return .iPhone17Series  // iPhone 17 Air
+        case (1260, 2736):  return .iPhone17Series  // iPhone 17 Air (portrait)
+        case (2736, 1260):  return .iPhone17Series  // iPhone 17 Air (landscape - width/height swapped)
             
         // TODO: Add iPhone 16e resolution when available
         // case (TBD, TBD): return .iPhone16e
             
         default:
+            // Debug: Print unknown device resolution to help identify new devices
+            #if DEBUG
+            print("⚠️ Unknown device resolution: \(width) x \(height) - Please add this case to DeviceIdentifier")
+            #endif
             return .unknown
         }
     }
