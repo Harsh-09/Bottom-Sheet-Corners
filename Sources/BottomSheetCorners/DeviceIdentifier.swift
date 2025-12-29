@@ -20,9 +20,21 @@ internal struct DeviceIdentifier {
     
     /// Returns the device category based on screen resolution
     static func currentCategory() -> DeviceCategory {
-        let screen = UIScreen.main.nativeBounds
-        let width = Int(screen.width)
-        let height = Int(screen.height)
+        let screen = UIScreen.main
+        let nativeBounds = screen.nativeBounds
+        let width = Int(nativeBounds.width)
+        let height = Int(nativeBounds.height)
+        let scale = screen.scale
+        let iosVersion = ProcessInfo.processInfo.operatingSystemVersion
+        
+        // Check for iPhone 17 Air first (before switch to prioritize detection)
+        // iPhone 17 Air uses unique resolution 1260 x 2736
+        if (width == 1260 && height == 2736) || (width == 2736 && height == 1260) {
+            #if DEBUG
+            print("✅ iPhone 17 Air detected: \(width) x \(height)")
+            #endif
+            return .iPhone17Series
+        }
         
         switch (width, height) {
         // iPhone 11 Series
@@ -52,8 +64,8 @@ internal struct DeviceIdentifier {
         case (1320, 2868):  return .iPhone16ProMax
             
         // iPhone 17 series (17, 17 Air, 17 Pro, 17 Pro Max)
-        case (1260, 2736):  return .iPhone17Series  // iPhone 17 Air (portrait)
-        case (2736, 1260):  return .iPhone17Series  // iPhone 17 Air (landscape - width/height swapped)
+        // Note: iPhone 17 Air (1260x2736) is handled above before the switch statement
+        // Add other iPhone 17 series resolutions here when available
             
         // TODO: Add iPhone 16e resolution when available
         // case (TBD, TBD): return .iPhone16e
@@ -61,7 +73,7 @@ internal struct DeviceIdentifier {
         default:
             // Debug: Print unknown device resolution to help identify new devices
             #if DEBUG
-            print("⚠️ Unknown device resolution: \(width) x \(height) - Please add this case to DeviceIdentifier")
+            print("⚠️ Unknown device resolution: \(width) x \(height), scale: \(scale), iOS: \(iosVersion.majorVersion).\(iosVersion.minorVersion) - Please add this case to DeviceIdentifier")
             #endif
             return .unknown
         }
