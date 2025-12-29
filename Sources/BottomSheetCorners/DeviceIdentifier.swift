@@ -39,11 +39,7 @@ internal struct DeviceIdentifier {
             print("🔍 Machine identifier: \(machine)")
             #endif
             
-            // iPhone 17 series machine identifiers
-            // iPhone 17 Air: iPhone17,2 (example - update with actual identifier)
-            // iPhone 17: iPhone17,1
-            // iPhone 17 Pro: iPhone17,3
-            // iPhone 17 Pro Max: iPhone17,4
+            // iPhone 17 series machine identifiers (e.g., iPhone17,1, iPhone17,2, etc.)
             if machine.hasPrefix("iPhone17,") {
                 #if DEBUG
                 print("✅ iPhone 17 series detected via machine identifier: \(machine)")
@@ -53,12 +49,9 @@ internal struct DeviceIdentifier {
         }
         
         // Fall back to resolution-based detection
-        let screen = UIScreen.main
-        let nativeBounds = screen.nativeBounds
+        let nativeBounds = UIScreen.main.nativeBounds
         let width = Int(nativeBounds.width)
         let height = Int(nativeBounds.height)
-        let scale = screen.scale
-        let iosVersion = ProcessInfo.processInfo.operatingSystemVersion
         
         // Check for iPhone 17 Air first (before switch to prioritize detection)
         // iPhone 17 Air uses unique resolution 1260 x 2736
@@ -107,6 +100,8 @@ internal struct DeviceIdentifier {
             // Debug: Print unknown device resolution to help identify new devices
             #if DEBUG
             let machine = machineIdentifier() ?? "unknown"
+            let scale = UIScreen.main.scale
+            let iosVersion = ProcessInfo.processInfo.operatingSystemVersion
             print("⚠️ Unknown device - Machine: \(machine), Resolution: \(width) x \(height), scale: \(scale), iOS: \(iosVersion.majorVersion).\(iosVersion.minorVersion) - Please add this case to DeviceIdentifier")
             #endif
             return .unknown
