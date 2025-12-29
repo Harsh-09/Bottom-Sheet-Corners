@@ -1,7 +1,20 @@
 import UIKit
+import Darwin
 
-/// Identifies the current device based on screen resolution
+/// Identifies the current device based on screen resolution and machine identifier
 internal struct DeviceIdentifier {
+    
+    /// Gets the device machine identifier (e.g., "iPhone17,2" for iPhone 17 Air)
+    /// This is App Store safe - uses public sysctlbyname API
+    private static func machineIdentifier() -> String? {
+        var size = 0
+        sysctlbyname("hw.machine", nil, &size, nil, 0)
+        var machine = [CChar](repeating: 0, count: size)
+        guard sysctlbyname("hw.machine", &machine, &size, nil, 0) == 0 else {
+            return nil
+        }
+        return String(cString: machine)
+    }
     
     /// Device categories based on corner radius groupings
     enum DeviceCategory {
@@ -18,8 +31,28 @@ internal struct DeviceIdentifier {
         case unknown                 // Fallback
     }
     
-    /// Returns the device category based on screen resolution
+    /// Returns the device category based on machine identifier and screen resolution
     static func currentCategory() -> DeviceCategory {
+        // First, try to identify using machine identifier (most reliable)
+        if let machine = machineIdentifier() {
+            #if DEBUG
+            print("🔍 Machine identifier: \(machine)")
+            #endif
+            
+            // iPhone 17 series machine identifiers
+            // iPhone 17 Air: iPhone17,2 (example - update with actual identifier)
+            // iPhone 17: iPhone17,1
+            // iPhone 17 Pro: iPhone17,3
+            // iPhone 17 Pro Max: iPhone17,4
+            if machine.hasPrefix("iPhone17,") {
+                #if DEBUG
+                print("✅ iPhone 17 series detected via machine identifier: \(machine)")
+                #endif
+                return .iPhone17Series
+            }
+        }
+        
+        // Fall back to resolution-based detection
         let screen = UIScreen.main
         let nativeBounds = screen.nativeBounds
         let width = Int(nativeBounds.width)
@@ -31,7 +64,7 @@ internal struct DeviceIdentifier {
         // iPhone 17 Air uses unique resolution 1260 x 2736
         if (width == 1260 && height == 2736) || (width == 2736 && height == 1260) {
             #if DEBUG
-            print("✅ iPhone 17 Air detected: \(width) x \(height)")
+            print("✅ iPhone 17 Air detected via resolution: \(width) x \(height)")
             #endif
             return .iPhone17Series
         }
@@ -73,7 +106,8 @@ internal struct DeviceIdentifier {
         default:
             // Debug: Print unknown device resolution to help identify new devices
             #if DEBUG
-            print("⚠️ Unknown device resolution: \(width) x \(height), scale: \(scale), iOS: \(iosVersion.majorVersion).\(iosVersion.minorVersion) - Please add this case to DeviceIdentifier")
+            let machine = machineIdentifier() ?? "unknown"
+            print("⚠️ Unknown device - Machine: \(machine), Resolution: \(width) x \(height), scale: \(scale), iOS: \(iosVersion.majorVersion).\(iosVersion.minorVersion) - Please add this case to DeviceIdentifier")
             #endif
             return .unknown
         }
