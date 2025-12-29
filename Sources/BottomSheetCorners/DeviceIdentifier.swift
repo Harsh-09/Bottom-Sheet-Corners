@@ -51,11 +51,17 @@ internal struct DeviceIdentifier {
         // iPhone 16 Pro Max
         case (1320, 2868):  return .iPhone16ProMax
             
+        // iPhone 17 series (17, 17 Air, 17 Pro, 17 Pro Max)
+        // iPhone 17 Air - add the actual resolution here when confirmed
+        // To find the resolution on your device, add this debug code temporarily:
+        // print("Resolution: \(Int(UIScreen.main.nativeBounds.width)) x \(Int(UIScreen.main.nativeBounds.height))")
+        // Common possible resolutions: 1179x2556, 1182x2558, or a new unique resolution
+        // If iPhone 17 Air uses 1179x2556, it will be caught by iPhone14Pro15_16Base above
+        // If it uses a different resolution, add it here:
+        case (1182, 2558):  return .iPhone17Series  // iPhone 17 Air (tentative - verify with actual device)
+            
         // TODO: Add iPhone 16e resolution when available
         // case (TBD, TBD): return .iPhone16e
-            
-        // TODO: Add iPhone 17 series resolutions when available
-        // case (TBD, TBD): return .iPhone17Series
             
         default:
             return .unknown
